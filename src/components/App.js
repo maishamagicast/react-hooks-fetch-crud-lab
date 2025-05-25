@@ -16,7 +16,7 @@ function App() {
 
   },[])
 // handle form submission
-function handleAddQusetion(newQuestion){
+function handleAddQuestion(newQuestion){
   fetch('http://localhost:4000/questions',{
     method: 'POST',
     headers: {
@@ -34,10 +34,44 @@ function handleAddQusetion(newQuestion){
 }
 
 
+ //handleDeleteQuestion
+ function handleDeleteQuestion(deletedQuestionId) {
+  fetch(`http://localhost:4000/questions/${deletedQuestionId}`, {
+     method: 'DELETE',
+  })
+   .then(() => {
+    const updatedQuestions = questions.filter((question) => question.id !== deletedQuestionId);
+    setQuestions(updatedQuestions);
+   })
+
+ }
+
+ //handleCorrectAnswerChange
+ function handleCorrectAnswerChange(questionId, newCorrectIndex) {
+  fetch(`http://localhost:4000/questions/${questionId}`, {
+    method: 'PATCH',
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ correctIndex: newCorrectIndex })
+  })
+    .then(r => r.json())
+    .then((updatedQuestion) => {
+      const updatedQuestions = questions.map((question) =>
+        question.id === questionId ? updatedQuestion : question
+      );
+      setQuestions(updatedQuestions);
+    });
+  }
+ 
+
+
   return (
     <main>
       <AdminNavBar onChangePage={setPage} />
-      {page === "Form" ? <QuestionForm onAddQuestion={handleAddQusetion}/> : <QuestionList questions={questions} />}
+      {page === "Form" ? 
+      <QuestionForm onAddQuestion={handleAddQuestion} /> : 
+      <QuestionList questions={questions} onDelete={handleDeleteQuestion} correctAnswerChange={handleCorrectAnswerChange}/>}
 
     </main>
   );
